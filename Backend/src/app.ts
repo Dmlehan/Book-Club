@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
+import readerRoutes from './routes/readerRoutes';
 
 const app: Application = express();
 
@@ -11,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/readers', readerRoutes);
 
 // Health Check Endpoint
 app.get('/api/health', (req: Request, res: Response) => {
@@ -22,4 +24,5 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 export default app;
+
 
