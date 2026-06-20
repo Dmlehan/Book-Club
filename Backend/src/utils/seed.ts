@@ -1,5 +1,13 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import dns from 'dns';
+
+// Force DNS lookup to use public DNS servers (Google and Cloudflare) to resolve MongoDB Atlas SRV records correctly
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+} catch (err) {
+  console.warn('Could not set custom DNS servers, using system default:', err);
+}
 
 // Load environmental parameters
 dotenv.config({ path: path.join(__dirname, '../../.env') });

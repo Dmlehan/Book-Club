@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { BookOpen, User, Lock, AlertCircle } from 'lucide-react';
+import { User, Lock, AlertCircle } from 'lucide-react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -54,8 +54,8 @@ export default function Login() {
         
         {/* Brand / Logo Header */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-3 transform hover:rotate-6 transition-transform duration-300">
-            <BookOpen className="w-7 h-7 text-white" />
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/20 mb-3 transform hover:scale-105 transition-all duration-300 border-2 border-emerald-500">
+            <img src="/assets/logo.jpeg" alt="Book-Club Logo" className="w-full h-full object-cover" />
           </div>
           <h2 className="text-2xl font-extrabold tracking-tight text-white font-sans">
             Staff Portal
