@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Readers from './pages/Readers';
+import Books from './pages/Books';
 import Dashboard from './pages/Dashboard';
 
 // Protected Route Wrapper Component
@@ -92,15 +93,7 @@ function App() {
               }
             >
               <Route index element={<Dashboard />} />
-              <Route 
-                path="books" 
-                element={
-                  <PlaceholderPage 
-                    name="Books Catalogue Management" 
-                    description="Complete book catalog browser (CRUD support, stock allocation counts, and full-text matching regex indexes) will be implemented in Phase 5." 
-                  />
-                } 
-              />
+              <Route path="books" element={<Books />} />
               <Route path="readers" element={<Readers />} />
               <Route 
                 path="lending" 
