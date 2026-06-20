@@ -3,6 +3,21 @@ import Lending from '../models/Lending';
 import Book from '../models/Book';
 import Reader from '../models/Reader';
 import { createAuditLog } from '../utils/auditLogger';
+import { sendEmail } from '../utils/mailer';
+
+/**
+ * Helper to update overdue lending status records dynamically
+ */
+const updateOverdueStatus = async (): Promise<void> => {
+  try {
+    await Lending.updateMany(
+      { status: 'LENT', dueDate: { $lt: new Date() } },
+      { $set: { status: 'OVERDUE' } }
+    );
+  } catch (error) {
+    console.error('Failed to update overdue statuses:', error);
+  }
+};
 
 /**
  * Lend a book to a registered reader
@@ -10,7 +25,7 @@ import { createAuditLog } from '../utils/auditLogger';
  */
 export const lendBook = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { bookId, readerId, issueDate } = req.body;
+    const { bookId, readerId, issueDate, dueDate } = req.body;
 
     // Validate inputs
     if (!bookId || !readerId) {
@@ -55,6 +70,7 @@ export const lendBook = async (req: Request, res: Response): Promise<void> => {
       book: bookId,
       reader: readerId,
       issueDate: issueDate || new Date(),
+      dueDate: dueDate || undefined,
       status: 'LENT',
     });
 
@@ -140,8 +156,11 @@ export const returnBook = async (req: Request, res: Response): Promise<void> => 
 export const getAllLendings = async (req: Request, res: Response): Promise<void> => {
   try {
     const { reader, book, status } = req.query;
-    const filter: any = {};
+    
+    // Check and update overdue states before fetching
+    await updateOverdueStatus();
 
+    const filter: any = {};
     if (reader) filter.reader = reader;
     if (book) filter.book = book;
     if (status) filter.status = status;
@@ -166,6 +185,9 @@ export const getLendingById = async (req: Request, res: Response): Promise<void>
   try {
     const { id } = req.params;
 
+    // Check and update overdue states
+    await updateOverdueStatus();
+
     const lending = await Lending.findById(id)
       .populate('book', 'title isbn author')
       .populate('reader', 'name email readerId phone');
@@ -179,5 +201,88 @@ export const getLendingById = async (req: Request, res: Response): Promise<void>
   } catch (error: any) {
     console.error('Error retrieving lending record:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+/**
+ * Send an overdue alert email to a patron
+ * POST /api/lending/:id/alert
+ */
+export const sendOverdueAlert = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const lending = await Lending.findById(id)
+      .populate('book', 'title isbn author')
+      .populate('reader', 'name email readerId');
+
+    if (!lending) {
+      res.status(404).json({ error: 'Lending record not found' });
+      return;
+    }
+
+    const book = lending.book as any;
+    const reader = lending.reader as any;
+
+    if (!reader || !reader.email) {
+      res.status(400).json({ error: 'Patron email address is missing' });
+      return;
+    }
+
+    // Calculate overdue duration days
+    const overdueDays = Math.ceil(
+      (new Date().getTime() - new Date(lending.dueDate).getTime()) / (1000 * 3600 * 24)
+    );
+
+    // Style elements for the overdue notification template
+    const emailHtml = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+        <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
+          <h2 style="color: #10b981; margin: 0; font-size: 22px;">Book-Club Library Hub</h2>
+          <p style="color: #94a3b8; margin: 5px 0 0; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">Overdue Notice</p>
+        </div>
+        <div style="padding: 25px 15px; color: #334155; line-height: 1.6;">
+          <p style="font-size: 15px; margin-top: 0;">Dear <strong>${reader.name}</strong>,</p>
+          <p>This is a friendly reminder that a book borrowed under your library membership is now overdue. Please review details below:</p>
+          
+          <div style="background-color: #fff1f2; padding: 20px; border-left: 4px solid #f43f5e; border-radius: 6px; margin: 25px 0;">
+            <p style="margin: 0 0 8px; font-size: 14px;"><strong>Book Title:</strong> ${book.title}</p>
+            <p style="margin: 0 0 8px; font-size: 14px;"><strong>Author:</strong> ${book.author}</p>
+            <p style="margin: 0 0 8px; font-size: 14px;"><strong>ISBN:</strong> ${book.isbn}</p>
+            <p style="margin: 0 0 8px; font-size: 14px;"><strong>Due Date:</strong> ${new Date(lending.dueDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p style="margin: 0; font-size: 14px; color: #e11d48;"><strong>Overdue Duration:</strong> ${overdueDays} day(s)</p>
+          </div>
+          
+          <p>Please return this volume to the circulation desk as soon as possible to avoid patreon account suspensions or penalties.</p>
+          <p>If you have already returned this title, please ignore this warning.</p>
+          <p style="margin-bottom: 0; padding-top: 15px;">Best regards,<br><strong>Book-Club Administration</strong></p>
+        </div>
+        <div style="text-align: center; font-size: 11px; color: #94a3b8; padding-top: 20px; border-top: 1px solid #e2e8f0; font-style: italic;">
+          This is an automated notification. Replies are not monitored.
+        </div>
+      </div>
+    `;
+
+    // Dispatch email
+    await sendEmail(
+      reader.email,
+      `⚠️ Overdue Notice: '${book.title}' - Return Book Immediately`,
+      emailHtml
+    );
+
+    // Log alert event
+    const performedBy = req.user?.id || '';
+    await createAuditLog(
+      'SEND_ALERT',
+      'Lending',
+      lending._id.toString(),
+      performedBy,
+      `Sent overdue notice email to reader '${reader.name}' for book '${book.title}'`
+    );
+
+    res.status(200).json({ message: 'Overdue alert notification dispatched successfully' });
+  } catch (error: any) {
+    console.error('Error sending overdue alert:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 };

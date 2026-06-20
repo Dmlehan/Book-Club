@@ -7,7 +7,10 @@ import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Readers from './pages/Readers';
 import Books from './pages/Books';
+import Lending from './pages/Lending';
+import OverdueList from './pages/OverdueList';
 import Dashboard from './pages/Dashboard';
+import AuditLogs from './pages/AuditLogs';
 
 // Protected Route Wrapper Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -95,24 +98,9 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="books" element={<Books />} />
               <Route path="readers" element={<Readers />} />
-              <Route 
-                path="lending" 
-                element={
-                  <PlaceholderPage 
-                    name="Lending & Transaction Desk" 
-                    description="Automated book checkouts, reader autocomplete filters, and return due date calculations will be implemented in Phase 6." 
-                  />
-                } 
-              />
-              <Route 
-                path="overdue" 
-                element={
-                  <PlaceholderPage 
-                    name="Overdue Delinquencies Panel" 
-                    description="Lending logs matching overdue dates, patreon contacts lists, and automated reminder alerts will be implemented in Phase 6." 
-                  />
-                } 
-              />
+              <Route path="lending" element={<Lending />} />
+              <Route path="overdue" element={<OverdueList />} />
+              <Route path="audit" element={<AuditLogs />} />
             </Route>
 
             {/* Redirect all unmatched routes */}

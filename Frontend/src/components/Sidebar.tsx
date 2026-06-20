@@ -9,7 +9,8 @@ import {
   AlertTriangle,
   LogOut,
   X,
-  Library
+  Library,
+  History
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -26,6 +27,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { name: 'Reader Management', path: '/readers', icon: Users },
     { name: 'Lending Operations', path: '/lending', icon: ClipboardList },
     { name: 'Overdue Alerts', path: '/overdue', icon: AlertTriangle },
+    { name: 'Audit Logs', path: '/audit', icon: History },
   ];
 
   const sidebarContent = (

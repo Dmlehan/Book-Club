@@ -173,6 +173,19 @@ export default function Readers() {
     r.readerId.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const totalPages = Math.ceil(filteredReaders.length / itemsPerPage) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const paginatedReaders = filteredReaders.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <div className="flex-1 p-6 md:p-8 space-y-6 bg-slate-50 dark:bg-[#020617] overflow-y-auto transition-colors duration-200 text-slate-800 dark:text-slate-100">
       
@@ -261,68 +274,105 @@ export default function Readers() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs text-slate-700 dark:text-slate-300">
-              <thead className="bg-slate-100 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-850">
-                <tr>
-                  <th className="px-6 py-4">Reader ID</th>
-                  <th className="px-6 py-4">Patron Name</th>
-                  <th className="px-6 py-4">Email Address</th>
-                  <th className="px-6 py-4">Phone Number</th>
-                  <th className="px-6 py-4">Joined Date</th>
-                  <th className="px-6 py-4 text-right">Control Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800/40 bg-white/30 dark:bg-transparent">
-                {filteredReaders.map((reader) => (
-                  <tr key={reader._id} className="hover:bg-slate-200/20 dark:hover:bg-slate-900/30 transition-colors">
-                    <td className="px-6 py-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                      {reader.readerId}
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-slate-950 dark:text-white">
-                      {reader.name}
-                    </td>
-                    <td className="px-6 py-4 font-medium">
-                      <div className="flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{reader.email}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-medium">
-                      <div className="flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{reader.phone}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-medium text-slate-450 dark:text-slate-500">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{new Date(reader.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleOpenEdit(reader)}
-                          className="p-1.5 rounded bg-slate-105 hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus:outline-none"
-                          title="Modify Patron Details"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleOpenDelete(reader)}
-                          className="p-1.5 rounded bg-rose-50 hover:bg-rose-500/10 border border-rose-500/10 text-rose-500 hover:text-rose-650 transition-colors focus:outline-none"
-                          title="Revoke Patron Access"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-xs text-slate-700 dark:text-slate-300">
+                <thead className="bg-slate-100 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-850">
+                  <tr>
+                    <th className="px-6 py-4">Reader ID</th>
+                    <th className="px-6 py-4">Patron Name</th>
+                    <th className="px-6 py-4">Email Address</th>
+                    <th className="px-6 py-4">Phone Number</th>
+                    <th className="px-6 py-4">Joined Date</th>
+                    <th className="px-6 py-4 text-right">Control Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800/40 bg-white/30 dark:bg-transparent">
+                  {paginatedReaders.map((reader) => (
+                    <tr key={reader._id} className="hover:bg-slate-200/20 dark:hover:bg-slate-900/30 transition-colors">
+                      <td className="px-6 py-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        {reader.readerId}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-slate-955 dark:text-white">
+                        {reader.name}
+                      </td>
+                      <td className="px-6 py-4 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{reader.email}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{reader.phone}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-450 dark:text-slate-500">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{new Date(reader.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleOpenEdit(reader)}
+                            className="p-1.5 rounded bg-slate-105 hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus:outline-none"
+                            title="Modify Patron Details"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleOpenDelete(reader)}
+                            className="p-1.5 rounded bg-rose-50 hover:bg-rose-500/10 border border-rose-500/10 text-rose-500 hover:text-rose-650 transition-colors focus:outline-none"
+                            title="Revoke Patron Access"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Pagination Controls */}
+            <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Showing <span className="font-bold text-slate-900 dark:text-white">{filteredReaders.length > 0 ? startIndex + 1 : 0}</span> to{' '}
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {Math.min(startIndex + itemsPerPage, filteredReaders.length)}
+                </span>{' '}
+                of <span className="font-bold text-slate-900 dark:text-white">{filteredReaders.length}</span> patrons
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  id="btn-readers-prev"
+                  variant="outline"
+                  size="sm"
+                  className="px-3 py-1.5 text-[11px] font-bold"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={activePage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-xs text-slate-550 dark:text-slate-400 font-bold px-2">
+                  Page {activePage} of {totalPages}
+                </span>
+                <Button
+                  id="btn-readers-next"
+                  variant="outline"
+                  size="sm"
+                  className="px-3 py-1.5 text-[11px] font-bold"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={activePage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </>
         )}
       </div>
 

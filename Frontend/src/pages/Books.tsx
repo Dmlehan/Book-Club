@@ -59,6 +59,19 @@ export default function Books() {
     return () => clearTimeout(delayDebounce);
   }, [search]);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const totalPages = Math.ceil(books.length / itemsPerPage) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const paginatedBooks = books.slice(startIndex, startIndex + itemsPerPage);
+
   const fetchBooks = async () => {
     try {
       setLoading(true);
@@ -274,79 +287,116 @@ export default function Books() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs text-slate-700 dark:text-slate-300">
-              <thead className="bg-slate-100 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-850">
-                <tr>
-                  <th className="px-6 py-4">Title</th>
-                  <th className="px-6 py-4">Author</th>
-                  <th className="px-6 py-4">ISBN</th>
-                  <th className="px-6 py-4">Genre</th>
-                  <th className="px-6 py-4 text-center">Total Copies</th>
-                  <th className="px-6 py-4 text-center">Available Copies</th>
-                  <th className="px-6 py-4">Stock Status</th>
-                  <th className="px-6 py-4 text-right">Control Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800/40 bg-white/30 dark:bg-transparent">
-                {books.map((book) => (
-                  <tr key={book._id} className="hover:bg-slate-200/20 dark:hover:bg-slate-900/30 transition-colors">
-                    <td className="px-6 py-4 font-bold text-slate-955 dark:text-white max-w-xs truncate">
-                      {book.title}
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-slate-850 dark:text-slate-200">
-                      {book.author}
-                    </td>
-                    <td className="px-6 py-4 font-mono font-medium text-slate-600 dark:text-slate-400">
-                      {book.isbn}
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-slate-500 dark:text-slate-450">
-                      {book.genre || '—'}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-center text-slate-800 dark:text-slate-200">
-                      {book.totalCopies}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-center text-slate-950 dark:text-white">
-                      {book.availableCopies}
-                    </td>
-                    <td className="px-6 py-4">
-                      {book.availableCopies === 0 ? (
-                        <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/30 rounded-full uppercase tracking-wider">
-                          Out of Stock
-                        </span>
-                      ) : book.availableCopies <= 2 ? (
-                        <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/30 rounded-full uppercase tracking-wider">
-                          Low Stock ({book.availableCopies} left)
-                        </span>
-                      ) : (
-                        <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-250 dark:border-emerald-900/30 rounded-full uppercase tracking-wider">
-                          In Stock ({book.availableCopies} left)
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleOpenEdit(book)}
-                          className="p-1.5 rounded bg-slate-105 hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus:outline-none"
-                          title="Modify Book Details"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleOpenDelete(book)}
-                          className="p-1.5 rounded bg-rose-50 hover:bg-rose-500/10 border border-rose-500/10 text-rose-500 hover:text-rose-650 transition-colors focus:outline-none"
-                          title="Remove Title from Catalogue"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-xs text-slate-700 dark:text-slate-300">
+                <thead className="bg-slate-100 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-850">
+                  <tr>
+                    <th className="px-6 py-4">Title</th>
+                    <th className="px-6 py-4">Author</th>
+                    <th className="px-6 py-4">ISBN</th>
+                    <th className="px-6 py-4">Genre</th>
+                    <th className="px-6 py-4 text-center">Total Copies</th>
+                    <th className="px-6 py-4 text-center">Available Copies</th>
+                    <th className="px-6 py-4">Stock Status</th>
+                    <th className="px-6 py-4 text-right">Control Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800/40 bg-white/30 dark:bg-transparent">
+                  {paginatedBooks.map((book) => (
+                    <tr key={book._id} className="hover:bg-slate-200/20 dark:hover:bg-slate-900/30 transition-colors">
+                      <td className="px-6 py-4 font-bold text-slate-955 dark:text-white max-w-xs truncate">
+                        {book.title}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-slate-850 dark:text-slate-200">
+                        {book.author}
+                      </td>
+                      <td className="px-6 py-4 font-mono font-medium text-slate-600 dark:text-slate-400">
+                        {book.isbn}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-slate-500 dark:text-slate-455">
+                        {book.genre || '—'}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-center text-slate-800 dark:text-slate-200">
+                        {book.totalCopies}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-center text-slate-950 dark:text-white">
+                        {book.availableCopies}
+                      </td>
+                      <td className="px-6 py-4">
+                        {book.availableCopies === 0 ? (
+                          <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/30 rounded-full uppercase tracking-wider">
+                            Out of Stock
+                          </span>
+                        ) : book.availableCopies <= 2 ? (
+                          <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/30 rounded-full uppercase tracking-wider">
+                            Low Stock ({book.availableCopies} left)
+                          </span>
+                        ) : (
+                          <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-250 dark:border-emerald-900/30 rounded-full uppercase tracking-wider">
+                            In Stock ({book.availableCopies} left)
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleOpenEdit(book)}
+                            className="p-1.5 rounded bg-slate-105 hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus:outline-none"
+                            title="Modify Book Details"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleOpenDelete(book)}
+                            className="p-1.5 rounded bg-rose-50 hover:bg-rose-500/10 border border-rose-500/10 text-rose-500 hover:text-rose-650 transition-colors focus:outline-none"
+                            title="Remove Title from Catalogue"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Pagination Controls */}
+            <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-xs text-slate-550 dark:text-slate-400 font-medium">
+                Showing <span className="font-bold text-slate-900 dark:text-white">{books.length > 0 ? startIndex + 1 : 0}</span> to{' '}
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {Math.min(startIndex + itemsPerPage, books.length)}
+                </span>{' '}
+                of <span className="font-bold text-slate-900 dark:text-white">{books.length}</span> titles
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  id="btn-books-prev"
+                  variant="outline"
+                  size="sm"
+                  className="px-3 py-1.5 text-[11px] font-bold"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={activePage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-xs text-slate-550 dark:text-slate-400 font-bold px-2">
+                  Page {activePage} of {totalPages}
+                </span>
+                <Button
+                  id="btn-books-next"
+                  variant="outline"
+                  size="sm"
+                  className="px-3 py-1.5 text-[11px] font-bold"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={activePage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </>
         )}
       </div>
 

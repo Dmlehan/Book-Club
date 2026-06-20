@@ -18,6 +18,9 @@ import {
 export default function Dashboard() {
   const [totalBooks, setTotalBooks] = useState<number>(0);
   const [totalReaders, setTotalReaders] = useState<number>(0);
+  const [totalActiveLendings, setTotalActiveLendings] = useState<number>(0);
+  const [totalOverdueLendings, setTotalOverdueLendings] = useState<number>(0);
+  const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -26,17 +29,32 @@ export default function Dashboard() {
     const fetchStats = async () => {
       try {
         setError('');
-        const [booksResponse, readersResponse] = await Promise.all([
+        const [booksResponse, readersResponse, lendingResponse, auditResponse] = await Promise.all([
           api.get('/books'),
-          api.get('/readers')
+          api.get('/readers'),
+          api.get('/lending'),
+          api.get('/audit')
         ]);
         
         // Handle array responses
         const books = Array.isArray(booksResponse.data) ? booksResponse.data : [];
         const readers = Array.isArray(readersResponse.data) ? readersResponse.data : [];
+        const lendings = Array.isArray(lendingResponse.data) ? lendingResponse.data : [];
+        const auditLogs = Array.isArray(auditResponse.data) ? auditResponse.data : [];
 
         setTotalBooks(books.length);
         setTotalReaders(readers.length);
+        
+        // Active Borrowings is status LENT
+        const activeLent = lendings.filter((l: any) => l.status === 'LENT').length;
+        setTotalActiveLendings(activeLent);
+        
+        // Overdue count
+        const overdue = lendings.filter((l: any) => l.status === 'OVERDUE').length;
+        setTotalOverdueLendings(overdue);
+
+        // Take top 5 recent audit logs as activities feed
+        setActivities(auditLogs.slice(0, 5));
       } catch (err: any) {
         console.error('Error fetching dashboard statistics:', err);
         setError('Failed to load system metrics from backend API.');
@@ -47,6 +65,24 @@ export default function Dashboard() {
 
     fetchStats();
   }, []);
+
+  // Helper to format timestamp relatively
+  const formatActivityTime = (timestampStr: string) => {
+    try {
+      const date = new Date(timestampStr);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins} min(s) ago`;
+      if (diffHours < 24) return `${diffHours} hour(s) ago`;
+      return date.toLocaleDateString();
+    } catch {
+      return '—';
+    }
+  };
 
   const stats = [
     { 
@@ -67,16 +103,16 @@ export default function Dashboard() {
     },
     { 
       name: 'Active Borrowings', 
-      value: 12, // Mocked for now (Phase 3 spec)
-      loading: false, 
+      value: totalActiveLendings, 
+      loading: loading, 
       icon: Bookmark, 
       color: 'from-amber-500/20 to-orange-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
       description: 'Books currently checked out'
     },
     { 
       name: 'Overdue Books', 
-      value: 3, // Mocked for now (Phase 3 spec)
-      loading: false, 
+      value: totalOverdueLendings, 
+      loading: loading, 
       icon: AlertCircle, 
       color: 'from-rose-500/20 to-red-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
       description: 'Outstanding returns past due'
@@ -88,15 +124,6 @@ export default function Dashboard() {
     { name: 'Register New Reader', icon: UserPlus, path: '/readers', color: 'hover:border-blue-500/40 text-blue-600 dark:text-blue-450 hover:bg-blue-500/5' },
     { name: 'Add Book to Catalog', icon: PlusCircle, path: '/books', color: 'hover:border-emerald-500/40 text-emerald-600 dark:text-emerald-450 hover:bg-emerald-500/5' },
     { name: 'Record Lending Transaction', icon: Bookmark, path: '/lending', color: 'hover:border-amber-500/40 text-amber-600 dark:text-amber-450 hover:bg-amber-500/5' },
-  ];
-
-  // Mocked activities feed representing audit events
-  const activities = [
-    { id: 1, action: 'CREATE_READER', detail: "Registered new reader profile 'Alice Cooper'", user: 'librarian1', time: '10 mins ago', success: true },
-    { id: 2, action: 'CREATE_BOOK', detail: "Added book 'The Hobbit' (9780261102217) to catalog", user: 'librarian1', time: '30 mins ago', success: true },
-    { id: 3, action: 'LEND_BOOK', detail: "Lent 'The Hobbit' to reader 'Alice Cooper'", user: 'librarian1', time: '2 hours ago', success: true },
-    { id: 4, action: 'UPDATE_BOOK', detail: "Adjusted stock levels for 'The Great Gatsby'", user: 'librarian1', time: 'Yesterday', success: true },
-    { id: 5, action: 'OVERDUE_ALERT', detail: "Sent email alert to Bob Marley for overdue book", user: 'system', time: 'Yesterday', success: true },
   ];
 
   return (
@@ -225,28 +252,34 @@ export default function Dashboard() {
               </div>
 
               <div className="divide-y divide-slate-250 dark:divide-slate-800/40">
-                {activities.map((act) => (
-                  <div key={act.id} className="py-3.5 flex items-start justify-between gap-4">
-                    <div className="flex gap-3">
-                      <div className="mt-0.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                          {act.detail}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] text-slate-500 font-semibold">User: @{act.user}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-650 font-bold">•</span>
-                          <span className="text-[10px] text-slate-500 font-semibold">{act.time}</span>
+                {activities.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-slate-400 font-semibold">
+                    No recent system activities found.
+                  </div>
+                ) : (
+                  activities.map((act) => (
+                    <div key={act._id} className="py-3.5 flex items-start justify-between gap-4 animate-fade-in">
+                      <div className="flex gap-3">
+                        <div className="mt-0.5">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                            {act.details || 'System operation processed.'}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] text-slate-500 font-semibold">User: @{act.performedBy?.username || 'system'}</span>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-650 font-bold">•</span>
+                            <span className="text-[10px] text-slate-500 font-semibold">{formatActivityTime(act.timestamp)}</span>
+                          </div>
                         </div>
                       </div>
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-550 dark:text-slate-400 uppercase tracking-widest shrink-0">
+                        {act.action ? act.action.split('_')[0] : 'SYSTEM'}
+                      </span>
                     </div>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-widest shrink-0">
-                      {act.action.split('_')[0]}
-                    </span>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
             

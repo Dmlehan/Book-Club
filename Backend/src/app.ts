@@ -4,6 +4,7 @@ import authRoutes from './routes/authRoutes';
 import readerRoutes from './routes/readerRoutes';
 import bookRoutes from './routes/bookRoutes';
 import lendingRoutes from './routes/lendingRoutes';
+import auditRoutes from './routes/auditRoutes';
 
 const app: Application = express();
 
@@ -17,6 +18,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/readers', readerRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/lending', lendingRoutes);
+app.use('/api/audit', auditRoutes);
 
 // Health Check Endpoint
 app.get('/api/health', (req: Request, res: Response) => {
