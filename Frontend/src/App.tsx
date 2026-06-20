@@ -5,6 +5,7 @@ import { ThemeProvider } from './hooks/useTheme';
 import Login from './pages/Login';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
+import Readers from './pages/Readers';
 import Dashboard from './pages/Dashboard';
 
 // Protected Route Wrapper Component
@@ -100,15 +101,7 @@ function App() {
                   />
                 } 
               />
-              <Route 
-                path="readers" 
-                element={
-                  <PlaceholderPage 
-                    name="Reader Membership Registry" 
-                    description="Reader profile profiles, memberships tracking, phone contacts validations, and search registry indices will be implemented in Phase 4." 
-                  />
-                } 
-              />
+              <Route path="readers" element={<Readers />} />
               <Route 
                 path="lending" 
                 element={
