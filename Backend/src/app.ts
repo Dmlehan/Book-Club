@@ -21,7 +21,7 @@ app.use('/api/lending', lendingRoutes);
 app.use('/api/audit', auditRoutes);
 
 // Health Check Endpoint
-app.get('/api/health', (req: Request, res: Response) => {
+app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),

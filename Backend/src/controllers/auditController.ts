@@ -5,7 +5,7 @@ import AuditLog from '../models/AuditLog';
  * Get all system audit log records
  * GET /api/audit
  */
-export const getAllAuditLogs = async (req: Request, res: Response): Promise<void> => {
+export const getAllAuditLogs = async (_req: Request, res: Response): Promise<void> => {
   try {
     const logs = await AuditLog.find({})
       .populate('performedBy', 'username name')

@@ -68,7 +68,7 @@ export const createReader = async (req: Request, res: Response): Promise<void> =
  * Get all readers
  * GET /api/readers
  */
-export const getAllReaders = async (req: Request, res: Response): Promise<void> => {
+export const getAllReaders = async (_req: Request, res: Response): Promise<void> => {
   try {
     const readers = await Reader.find().sort({ createdAt: -1 });
     res.status(200).json(readers);

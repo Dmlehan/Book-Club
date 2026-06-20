@@ -48,3 +48,5 @@ mongoose.connect(MONGO_URI)
     console.error('Database connection error:', error);
     process.exit(1);
   });
+
+export default app;
