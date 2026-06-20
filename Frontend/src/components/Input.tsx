@@ -24,10 +24,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             ref={ref}
-            className={`w-full bg-slate-900/80 border text-sm text-slate-100 rounded-lg py-2.5 px-3 transition-all duration-200 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 placeholder-slate-500 ${
+            className={`w-full bg-white dark:bg-slate-900/80 border text-sm text-slate-900 dark:text-slate-100 rounded-lg py-2.5 px-3 transition-all duration-200 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 placeholder-slate-400 dark:placeholder-slate-500 ${
               leftIcon ? 'pl-10' : ''
             } ${
-              error ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/30' : 'border-slate-800'
+              error ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/30' : 'border-slate-300 dark:border-slate-800'
             } ${className}`}
             {...props}
           />

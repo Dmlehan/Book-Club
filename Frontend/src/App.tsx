@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { ThemeProvider } from './hooks/useTheme';
 import Login from './pages/Login';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
@@ -43,7 +44,7 @@ const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#020617] text-slate-100 font-sans">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-[#020617] text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -59,12 +60,12 @@ const AppLayout = () => {
 // Placeholder view for unfinished phases
 const PlaceholderPage = ({ name, description }: { name: string; description: string }) => {
   return (
-    <div className="flex-1 flex flex-col justify-center items-center p-8 bg-slate-950 relative overflow-hidden">
+    <div className="flex-1 flex flex-col justify-center items-center p-8 bg-slate-50 dark:bg-slate-950 relative overflow-hidden transition-colors duration-200">
       <div className="absolute top-1/3 left-1/2 w-[350px] h-[350px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/2 -translate-y-1/2" />
       <div className="glass-panel max-w-lg w-full rounded-2xl p-8 text-center space-y-4 shadow-xl z-10 animate-scale-in">
-        <h3 className="text-lg font-bold text-white">{name}</h3>
-        <p className="text-sm text-slate-400 leading-relaxed">{description}</p>
-        <div className="inline-block px-3 py-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/30 rounded-full uppercase tracking-widest">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{name}</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{description}</p>
+        <div className="inline-block px-3 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-250 dark:border-emerald-800/30 rounded-full uppercase tracking-widest">
           Scheduled Development Phase
         </div>
       </div>
@@ -75,62 +76,64 @@ const PlaceholderPage = ({ name, description }: { name: string; description: str
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          
-          {/* Protected Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Dashboard />} />
-            <Route 
-              path="books" 
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            
+            {/* Protected Routes */}
+            <Route
+              path="/"
               element={
-                <PlaceholderPage 
-                  name="Books Catalogue Management" 
-                  description="Complete book catalog browser (CRUD support, stock allocation counts, and full-text matching regex indexes) will be implemented in Phase 5." 
-                />
-              } 
-            />
-            <Route 
-              path="readers" 
-              element={
-                <PlaceholderPage 
-                  name="Reader Membership Registry" 
-                  description="Reader profile profiles, memberships tracking, phone contacts validations, and search registry indices will be implemented in Phase 4." 
-                />
-              } 
-            />
-            <Route 
-              path="lending" 
-              element={
-                <PlaceholderPage 
-                  name="Lending & Transaction Desk" 
-                  description="Automated book checkouts, reader autocomplete filters, and return due date calculations will be implemented in Phase 6." 
-                />
-              } 
-            />
-            <Route 
-              path="overdue" 
-              element={
-                <PlaceholderPage 
-                  name="Overdue Delinquencies Panel" 
-                  description="Lending logs matching overdue dates, patreon contacts lists, and automated reminder alerts will be implemented in Phase 6." 
-                />
-              } 
-            />
-          </Route>
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Dashboard />} />
+              <Route 
+                path="books" 
+                element={
+                  <PlaceholderPage 
+                    name="Books Catalogue Management" 
+                    description="Complete book catalog browser (CRUD support, stock allocation counts, and full-text matching regex indexes) will be implemented in Phase 5." 
+                  />
+                } 
+              />
+              <Route 
+                path="readers" 
+                element={
+                  <PlaceholderPage 
+                    name="Reader Membership Registry" 
+                    description="Reader profile profiles, memberships tracking, phone contacts validations, and search registry indices will be implemented in Phase 4." 
+                  />
+                } 
+              />
+              <Route 
+                path="lending" 
+                element={
+                  <PlaceholderPage 
+                    name="Lending & Transaction Desk" 
+                    description="Automated book checkouts, reader autocomplete filters, and return due date calculations will be implemented in Phase 6." 
+                  />
+                } 
+              />
+              <Route 
+                path="overdue" 
+                element={
+                  <PlaceholderPage 
+                    name="Overdue Delinquencies Panel" 
+                    description="Lending logs matching overdue dates, patreon contacts lists, and automated reminder alerts will be implemented in Phase 6." 
+                  />
+                } 
+              />
+            </Route>
 
-          {/* Redirect all unmatched routes */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
+            {/* Redirect all unmatched routes */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

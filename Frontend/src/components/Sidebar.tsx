@@ -29,22 +29,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   ];
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[#0b0f19] border-r border-slate-800/80 w-64 text-slate-300">
+    <div className="flex flex-col h-full bg-slate-100 dark:bg-[#0b0f19] border-r border-slate-200 dark:border-slate-800/80 w-64 text-slate-700 dark:text-slate-300 transition-colors duration-200">
       {/* Brand Header */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800/50">
+      <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-800/50">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center shadow-md shadow-emerald-500/10">
             <Library className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-md font-bold text-white leading-none">Book-Club</h1>
-            <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mt-1 block">Library Hub</span>
+            <h1 className="text-md font-bold text-slate-900 dark:text-white leading-none">Book-Club</h1>
+            <span className="text-[10px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-bold mt-1 block">Library Hub</span>
           </div>
         </div>
         {/* Close button for mobile */}
         <button 
           onClick={onClose} 
-          className="md:hidden text-slate-400 hover:text-white focus:outline-none"
+          className="md:hidden text-slate-400 hover:text-slate-900 dark:hover:text-white focus:outline-none"
         >
           <X className="w-5 h-5" />
         </button>
@@ -60,8 +60,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-emerald-600/10 text-emerald-400 border-l-4 border-emerald-500 shadow-inner'
-                  : 'hover:bg-slate-900/50 hover:text-slate-100'
+                  ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 border-l-4 border-emerald-500 shadow-inner'
+                  : 'hover:bg-slate-200/50 dark:hover:bg-slate-900/50 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
               }`
             }
           >
@@ -72,19 +72,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       {/* Bottom Profile & Logout */}
-      <div className="p-4 border-t border-slate-800/50 bg-[#090c14]">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800/50 bg-slate-200/40 dark:bg-[#090c14]">
         <div className="flex items-center gap-3 mb-4 px-2">
-          <div className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-sm">
+          <div className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-600 dark:text-emerald-400 text-sm">
             {user?.name?.charAt(0).toUpperCase() || 'S'}
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-bold text-white truncate leading-none">{user?.name}</p>
+            <p className="text-xs font-bold text-slate-950 dark:text-white truncate leading-none">{user?.name}</p>
             <p className="text-[9px] text-slate-500 truncate leading-none mt-1">@{user?.username}</p>
           </div>
         </div>
         <button
           onClick={logout}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/5 border border-slate-800 hover:border-rose-500/20 transition-all duration-200"
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-rose-500 hover:bg-rose-500/5 border border-slate-300 dark:border-slate-800 hover:border-rose-500/20 transition-all duration-200"
         >
           <LogOut className="w-4 h-4 shrink-0" />
           <span>Exit Staff Portal</span>

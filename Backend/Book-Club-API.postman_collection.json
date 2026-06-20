@@ -1,0 +1,483 @@
+{
+  "info": {
+    "_postman_id": "book-club-api-collection",
+    "name": "Book-Club Library API",
+    "description": "Complete API collection for the Book-Club Library System backend. Covers authentication, reader management, and book catalog endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token automatically set after login"
+    },
+    {
+      "key": "readerId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId of a created reader"
+    },
+    {
+      "key": "bookId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId of a created book"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔍 Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Checks whether the Express server is running and reachable."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Register Staff User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('User returned in response', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.user).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"librarian1\",\n  \"password\": \"securepassword123\",\n  \"name\": \"Jane Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new library staff user account."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Token received', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.token).to.be.a('string');",
+                  "    // Automatically save token to collection variable",
+                  "    pm.collectionVariables.set('token', body.token);",
+                  "    console.log('Token saved:', body.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"librarian1\",\n  \"password\": \"securepassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login and receive a JWT token. The token is automatically saved to the '{{token}}' collection variable and used for all protected requests."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👥 Readers",
+      "item": [
+        {
+          "name": "Create Reader",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Reader created and ID saved', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.reader._id).to.be.a('string');",
+                  "    pm.collectionVariables.set('readerId', body.reader._id);",
+                  "    console.log('Reader ID saved:', body.reader._id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"readerId\": \"R202401\",\n  \"name\": \"Alice Cooper\",\n  \"email\": \"alice.cooper@example.com\",\n  \"phone\": \"+15550199\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/readers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "readers"]
+            },
+            "description": "Register a new library reader. Requires a valid JWT token. The created reader's ID is automatically saved to '{{readerId}}'."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Readers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/readers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "readers"]
+            },
+            "description": "Retrieve a list of all registered readers."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reader by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/readers/{{readerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "readers", "{{readerId}}"]
+            },
+            "description": "Retrieve a specific reader using the '{{readerId}}' variable saved from the Create Reader request."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Reader",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice M. Cooper\",\n  \"phone\": \"+15550200\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/readers/{{readerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "readers", "{{readerId}}"]
+            },
+            "description": "Update reader details. Logs an UPDATE_READER audit entry."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Reader",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/readers/{{readerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "readers", "{{readerId}}"]
+            },
+            "description": "Delete a reader from the system. Logs a DELETE_READER audit entry."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📚 Books",
+      "item": [
+        {
+          "name": "Add Book to Catalog",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Book created and ID saved', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.book._id).to.be.a('string');",
+                  "    pm.collectionVariables.set('bookId', body.book._id);",
+                  "    console.log('Book ID saved:', body.book._id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Hobbit\",\n  \"author\": \"J.R.R. Tolkien\",\n  \"isbn\": \"9780261102217\",\n  \"genre\": \"Fantasy\",\n  \"totalCopies\": 3,\n  \"availableCopies\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books"]
+            },
+            "description": "Add a new book to the library catalog. Requires a valid JWT token. The created book's ID is automatically saved to '{{bookId}}'."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Books",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books"]
+            },
+            "description": "Retrieve all books in the catalog. No authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Search Books by Keyword",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/books?search=hobbit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "hobbit",
+                  "description": "General search across title, author, isbn, genre"
+                }
+              ]
+            },
+            "description": "Search the catalog using a keyword. Case-insensitive regex search across title, author, isbn, and genre."
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Books by Title",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/books?title=hobbit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books"],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "hobbit"
+                }
+              ]
+            },
+            "description": "Filter books by title using partial, case-insensitive match."
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Books by Author",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/books?author=tolkien",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books"],
+              "query": [
+                {
+                  "key": "author",
+                  "value": "tolkien"
+                }
+              ]
+            },
+            "description": "Filter books by author using partial, case-insensitive match."
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Books by ISBN",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/books?isbn=9780261102217",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books"],
+              "query": [
+                {
+                  "key": "isbn",
+                  "value": "9780261102217"
+                }
+              ]
+            },
+            "description": "Filter books by exact or partial ISBN."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Book by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/books/{{bookId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", "{{bookId}}"]
+            },
+            "description": "Retrieve details of a specific book using the '{{bookId}}' variable saved after creation."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Book",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalCopies\": 5,\n  \"availableCopies\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/books/{{bookId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", "{{bookId}}"]
+            },
+            "description": "Update book details or stock quantities. Requires authentication. Logs an UPDATE_BOOK audit entry."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Book",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books/{{bookId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", "{{bookId}}"]
+            },
+            "description": "Permanently remove a book from the catalog. Requires authentication. Logs a DELETE_BOOK audit entry."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
