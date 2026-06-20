@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://your-backend-service-url.com/api/:path*"
+      "destination": "https://book-club-backend-nine.vercel.app/api/:path*"
     }
   ]
 }
